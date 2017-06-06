@@ -1,0 +1,33 @@
+{
+  "name": "avocadobook",
+  "version": "1.0.0",
+  "description": "The first social network, designated to Avocados.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/madamerobot/avocadobook.git"
+  },
+  "keywords": [
+    "Avocado",
+    "Social",
+    "Network",
+    "Green"
+  ],
+  "author": "Valerie Fuchs",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/madamerobot/avocadobook/issues"
+  },
+  "homepage": "https://github.com/madamerobot/avocadobook#readme",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "fs": "0.0.1-security",
+    "pg": "^6.2.3",
+    "pug": "^2.0.0-rc.2",
+    "sequelize": "^3.30.4"
+  }
+}
