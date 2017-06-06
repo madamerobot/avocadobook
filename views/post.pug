@@ -4,7 +4,21 @@ html(lang='en')
 		meta(http-equiv='Content-Type', content='text/html; charset=UTF-8')
 		meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1.0')
 		include navigation.pug
-		title Your Post
+		title Posting Detail Page
 	body
-		h3 Your Post:
+		h3 Read The Post:
 			h4=postingcontent
+		h3 What other users said about this:
+			p=comments
+		//- each hit in comments
+		//- 	p=hit.comment
+		//- 	p _____
+		form.col.s12(action='/post', method='POST', autocomplete='off' id='form')
+			label(for='Comment') Anything to add?
+			br
+			br
+			input#name.validate(type='text', name='comment')
+			br
+			br
+			input#seepreview.mybutton(href= '/post', type='submit', name='submit', value="Publish Comment")
+

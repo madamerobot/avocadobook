@@ -1,9 +1,8 @@
 //---------CONFIG AND LIBRARIES-----------------
 
-//Sequelize
+//Requiring Sequelize library & initiating db connection
 const Sequelize = require('sequelize');
-var seq = require('./seq.js');
-seq.seq();
+const sequelize = new Sequelize('postgres://daisy:Duck@localhost/avocadonet');
 
 //Requiring express library
 const express = require('express');
@@ -31,6 +30,37 @@ app.use(express.static('public'));
 //Requiring postgres library
 const pg = require('pg');
 
+//------------DEFINING DATABASE MODELS
+var User = sequelize.define('user', {
+	name: Sequelize.STRING,
+	password: Sequelize.STRING
+});
+
+var Post = sequelize.define('post', {
+	post: Sequelize.STRING
+});
+
+var Comment = sequelize.define('comment', {
+	comment: Sequelize.STRING
+});
+
+//Defining dependencies
+
+//A user can write many posts
+User.hasMany(Post);
+//A post only belongs to one user
+Post.belongsTo(User);
+
+//A user can write many comments
+User.hasMany(Comment);
+//A comment only belongs to one user
+Comment.belongsTo(User);
+
+//Many comments belong to a post
+Post.hasMany(Comment);
+//A comment only belongs to one post
+Comment.belongsTo(Post);
+
 //----------------ROUTES----------------
 
 //ROUTE 01: WRITING A NEW POST
@@ -38,14 +68,14 @@ app.get('/addpost', function(req,res) {
 	res.render("addpost");
 })
 
+//Global variable to use outside of function scope
+var inputmessage = [];
+
 app.post('/addpost', function(req,res) {
 	
-	var inputmessage = req.body.posting;
-	console.log(inputmessage);
+	inputmessage = req.body.posting;
+	console.log('I receive this input as new posting: '+inputmessage);
 	res.render("post", {postingcontent: inputmessage});	
-
-	//Establishing database connection
-	const sequelize = new Sequelize('postgres://daisy:Duck@localhost/avocadonet');
 
 	// Creating a new posting
 	sequelize
@@ -59,10 +89,27 @@ app.post('/addpost', function(req,res) {
 
 //ROUTE 02: WRITING A COMMENT
 app.post('/post', function(req, res){
-	//get req.body.comment
-	//send comment to db
-	//display comment
-})
+
+	var inputcomment = req.body.comment;
+	console.log('I receive this input as new comment: '+inputcomment);
+	var userComments = [];
+
+	// Creating new comment
+	Comment.create({
+		comment: inputcomment 
+	})
+	.then( () => {
+		//Getting all comments from db and storing in variable 'usercomments'
+		Comment.findAll().then(function(rows) {
+			for(var i = 0; i < rows.length; i++) {
+				var columnData = rows[i].dataValues;
+				var userComments = columnData.comment;
+				console.log('These are all comments in the database: '+userComments);
+			}
+			res.render("post", {postingcontent: inputmessage, comments: userComments});
+		});
+	})
+});
 
 //ROUTE 03: LOGIN
 app.get('/', function(req,res){
@@ -105,5 +152,6 @@ app.get('/allpostings', function(req,res) {
 
 //------------DEFINING PORT 8080 FOR SERVER----------------------
 var server = app.listen(8080, () => {
+	sequelize.sync({force: true})
 	console.log('Yo, this http://localhost is running:' + server.address().port);
 });
