@@ -8,6 +8,8 @@ const sequelize = new Sequelize('postgres://daisy:Duck@localhost/avocadonet');
 const express = require('express');
 //Initialising express library
 const app = express();
+//Requiring express-session
+var session = require('express-session')
 
 //Requiring file system library
 const fs = require('fs');
@@ -111,7 +113,7 @@ app.post('/post', function(req, res){
 	})
 });
 
-//ROUTE 03: LOGIN
+//ROUTE 03: SIGN IN
 app.get('/', function(req,res){
 	res.render("home");
 })
@@ -126,16 +128,28 @@ app.post('/', function(req,res) {
 	//res.send("signup");
 })
 
-//ROUTE 04: SIGN UP
+//ROUTE 04: CREATE A NEW USER
 app.get('/signup', function(req,res){
 	res.render("signup");
 })
 
 app.post('/signup', function(req,res){
-	//get req.body.username
-	//get req.body.password
-	//send to db
-	//res.render("profile");
+
+	var inputname = req.body.username;
+	var inputpassword = req.body.password;
+
+	console.log("I am receiving following user credentials: "+inputname+" "+inputpassword);
+
+	//Creating new user
+	User.create({
+		name: inputname,
+		password: inputpassword
+	})
+	.then( () => {
+		res.render("profile", {
+			username: inputname
+		});
+	});
 })
 
 //ROUTE 05: DISPLAY ALL POSTINGS OF A SINGLE USER

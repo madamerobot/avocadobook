@@ -8,16 +8,16 @@ html(lang='en')
 	body
 		h4 Great, you want to be part of our network. 
 		h4 Good news: You are just one step away..
+		p=message
 		form.col.s12(action='/signup', method='POST', autocomplete='off' id='form')
-			label(for='name') Choose a username
+			label(for='username') Choose a username
 			br
-			input#name.validate(type='text', name='name')
+			input#name.validate(type='text', name='username')
 			br
 			br
-			label(for='name') Choose a password
+			label(for='password') Choose a password
 			br
 			input#password.validate(type='text', name='password')
 			br
 			br
-		form.col.s12(id='storypage', action='/signup', method='POST')
 			input#seepreview.mybutton(type='submit', value="Create new account")
