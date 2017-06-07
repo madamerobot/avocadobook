@@ -10,6 +10,12 @@ const express = require('express');
 const app = express();
 //Requiring express-session
 var session = require('express-session')
+//Initialising session
+app.use(session({
+    secret: 'oh wow very secret much security',
+    resave: true,
+    saveUninitialized: false
+}));
 
 //Requiring file system library
 const fs = require('fs');
@@ -18,10 +24,10 @@ const fs = require('fs');
 //This adds a body property to the request parameter of every app.get and app.post
 const bodyParser = require('body-parser');
 //Initialising body-parser li;brary
-app.use('/', bodyParser())
 app.use(bodyParser.urlencoded({
 	extended: false
 }))
+app.use(bodyParser.json())
 
 //Setting PUG view engine
 app.set('views', './views');
@@ -65,6 +71,77 @@ Comment.belongsTo(Post);
 
 //----------------ROUTES----------------
 
+//ROUTE 04: CREATE A NEW USER
+app.get('/signup', function(req,res){
+	res.render("signup");
+})
+
+app.post('/signup', function(req,res){
+
+	var inputname = req.body.username;
+	var inputpassword = req.body.password;
+
+	console.log("I am receiving following user credentials: "+inputname+" "+inputpassword);
+
+	// Creating a new user
+	sequelize
+		.sync({force: true})
+		.then(function(){
+			return User.create({
+			name: inputname,
+			password: inputpassword 
+			});
+	}).then( () => {
+		res.redirect('/?message=' + encodeURIComponent("Your user got successfully created."));
+	});
+})
+
+//ROUTE 03: SIGN IN
+app.get('/', function(req,res){
+
+	console.log('User: '+req.session.user);
+	console.log('Message: '+req.query.message);
+
+	res.render("home", {
+		message: req.query.message,
+		user: req.session.user
+	});
+});
+
+//Checking if either username or password are not being filled in. Then checking, if inputdata matches
+//any set from database. If given uersname exist, then check if given password is correct. Then either
+//send error message or render user profile.
+app.post('/', function (req,res) {
+
+	console.log('This is what I get: '+req.body.username+" "+req.body.password);
+
+    if(req.body.username.length === 0) {
+        res.redirect('/?message=' + encodeURIComponent("Please fill out your email address."));
+        return;
+    }
+
+    if(req.body.password.length === 0) {
+        res.redirect('/?message=' + encodeURIComponent("Please fill out your password."));
+        return;
+    }
+
+    User.findOne({
+        where: {
+            name: req.body.username
+        }
+    }).then(function (user) {
+        if (user !== null && req.body.password === user.password) {
+            req.session.user = user;
+            res.render("profile");
+            // res.redirect('/profile', {username: req.body.username});
+        } else {
+            res.redirect('/?message=' + encodeURIComponent("Invalid email or password."));
+        }
+    }, function (error) {
+        res.redirect('/?message=' + encodeURIComponent("Invalid email or password."));
+    });
+});
+
 //ROUTE 01: WRITING A NEW POST
 app.get('/addpost', function(req,res) {
 	res.render("addpost");
@@ -94,7 +171,6 @@ app.post('/post', function(req, res){
 
 	var inputcomment = req.body.comment;
 	console.log('I receive this input as new comment: '+inputcomment);
-	var userComments = [];
 
 	// Creating new comment
 	Comment.create({
@@ -112,45 +188,6 @@ app.post('/post', function(req, res){
 		});
 	})
 });
-
-//ROUTE 03: SIGN IN
-app.get('/', function(req,res){
-	res.render("home");
-})
-
-app.post('/', function(req,res) {
-	//get req.body.username
-	//get req.body.password
-	//for (var i = 0, i<userbase.length; i++)
-	//if req.body.username === userbase.username[i] && req.body.password === userbase.password[i]
-	//res.render("profile")
-	//else
-	//res.send("signup");
-})
-
-//ROUTE 04: CREATE A NEW USER
-app.get('/signup', function(req,res){
-	res.render("signup");
-})
-
-app.post('/signup', function(req,res){
-
-	var inputname = req.body.username;
-	var inputpassword = req.body.password;
-
-	console.log("I am receiving following user credentials: "+inputname+" "+inputpassword);
-
-	//Creating new user
-	User.create({
-		name: inputname,
-		password: inputpassword
-	})
-	.then( () => {
-		res.render("profile", {
-			username: inputname
-		});
-	});
-})
 
 //ROUTE 05: DISPLAY ALL POSTINGS OF A SINGLE USER
 app.get('/profile', function(req,res) {

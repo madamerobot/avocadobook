@@ -7,17 +7,19 @@ html(lang='en')
 		title Home
 	body
 		p
-			form.col.s12(action='/', method='POST', autocomplete='off' id='form')
-			label(for='name') Your Name
-			br
-			input#name.validate(type='text', name='name')
-			br
-			br
-			label(for='name') Your Password
-			br
-			input#password.validate(type='text', name='password')
-			br
-			br
-			input#seepreview.mybutton(href= '/post', type='submit', name='submit', value="Login")
+		p=message
+			form.col.s12(action='/', method='POST', autocomplete='off' id='signin')
+				label(for='username') Your Name
+				br
+				input#name.validate(type='text', name='username')
+				br
+				br
+				label(for='password') Your Password
+				br
+				input#password.validate(type='text', name='password')
+				br
+				br
+				input#seepreview.mybutton(type='submit', name='login', value="Login")
+		p=user
 		p You don't have an account yet? Sign up here.
 		a.mybutton.sml(href='/signup') Sign Up
