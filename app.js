@@ -92,7 +92,7 @@ app.post('/signup', function(req,res){
 			password: inputpassword 
 			});
 	}).then( () => {
-		res.redirect('/?message=' + encodeURIComponent("Your user got successfully created."));
+		res.redirect('/?message=' + encodeURIComponent("Your user got successfully created. Log in below."));
 	});
 })
 
@@ -132,8 +132,7 @@ app.post('/', function (req,res) {
     }).then(function (user) {
         if (user !== null && req.body.password === user.password) {
             req.session.user = user;
-            res.render("profile");
-            // res.redirect('/profile', {username: req.body.username});
+            res.render("profile", {user: user});
         } else {
             res.redirect('/?message=' + encodeURIComponent("Invalid email or password."));
         }
@@ -143,73 +142,160 @@ app.post('/', function (req,res) {
 });
 
 //ROUTE: SIGN OUT
-app.get('/logout', function (request, response) {
-    request.session.destroy(function(error) {
+app.get('/logout', function (req, res) {
+    req.session.destroy(function(error) {
         if(error) {
             throw error;
         }
-        response.redirect('/?message=' + encodeURIComponent("Successfully logged out."));
+        res.redirect('/?message=' + encodeURIComponent("Successfully logged out."));
     })
 });
 
 //ROUTE 01: WRITING A NEW POST
-app.get('/addpost', function(req,res) {
-	res.render("addpost");
-})
+app.get('/addpost', function (req, res) {
+
+	var user = req.session.user;
+    
+    if (user === undefined) {
+        res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
+    } else {
+        res.render("addpost");
+    }
+});
 
 //Global variable to use outside of function scope
-var inputmessage = [];
+// var inputmessage = [];
 
 app.post('/addpost', function(req,res) {
 	
-	inputmessage = req.body.posting;
+	var user = req.session.user.name;
+	var inputmessage = req.body.posting;
 	console.log('I receive this input as new posting: '+inputmessage);
-	res.render("post", {postingcontent: inputmessage});	
+	console.log('I receive this as user info: '+user);
 
-	// Creating a new posting
-	sequelize
-		.sync({force: true})
-		.then(function(){
-			return Post.create({
-			post: inputmessage 
-			});
-		});
+	User.findOne({
+    	where: {
+    		name: user
+    	}
+    }).then(function(user){
+    	user.createPost(
+    		{post: inputmessage
+    	});
+    	res.render("post", {postingcontent: inputmessage});	
+    });
 });
 
-//ROUTE 02: WRITING A COMMENT
-app.post('/post', function(req, res){
+app.post('/comment', (req, res) => {
+	const comment = request.body.comment;
+	const postId = request.body.postId
+	//put it in the database
+	res.redirect(`/posts/${postId}`)
+})
 
+//app.get -- localhost:3000/posts
+//app.get -- localhost:3000/posts/1
+ 
+app.get('/posts/:postId', (req, res) => {
+	const postId = req.params.postId
+	
+})
+
+//ROUTE 02: WRITING A COMMENT
+app.post('/post', function(req,res){
+
+	var user = req.session.user.name;
+	console.log('I see this as session user: '+user);
 	var inputcomment = req.body.comment;
 	console.log('I receive this input as new comment: '+inputcomment);
+	var inputcomment2 = req.body.posting;
+	console.log('I receive this input as new comment: '+inputcomment2);
+	var inputmessage = document.getElementById("postingcontent").value;
+	console.log('I see this value as posting content: '+inputmessage);
 
-	// Creating new comment
-	Comment.create({
-		comment: inputcomment 
-	})
-	.then( () => {
-		//Getting all comments from db and storing in variable 'usercomments'
-		Comment.findAll().then(function(rows) {
-			for(var i = 0; i < rows.length; i++) {
-				var columnData = rows[i].dataValues;
-				var userComments = columnData.comment;
-				console.log('These are all comments in the database: '+userComments);
-			}
-			res.render("post", {postingcontent: inputmessage, comments: userComments});
-		});
-	})
+	User.findOne({
+		where: {
+			name: user
+		}
+	}).then(function(user){
+		console.log('Seq finds this user: '+user);
+		user.createComment(
+			{comment: inputcomment});
+	});
+
+	Post.findOne({
+		where: {
+			post: inputmessage
+		}
+	}).then(function(post){
+		console.log('Seq finds this post: '+post);
+		post.createComment(
+			{comment: inputcomment});
+	});
+
+	Comment.findAll({
+		where: {
+			comment: inputmessage
+		}
+	}).then(function(comment){
+		console.log('Seq finds these comments: '+comment);
+		for (var i = 0; i<comment.length; i++){
+			var columnData = comment[i].dataValues;
+			var usercomments = columnData.comment;
+			console.log('All user comments in db: '+usercomments);
+		}
+	});
+	res.render("post", {comments: usercomments});
 });
 
 //ROUTE 05: DISPLAY ALL POSTINGS OF A SINGLE USER
-app.get('/profile', function(req,res) {
-	//get all postings from one user from db
-	res.render("profile", {userpostings: userpostings});
+app.get('/profile', function (req, res) {
+    var user = req.session.user;
+    if (user === undefined) {
+        res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
+    } else {
+        res.render("profile");
+    }
+});
+
+app.post('/profile', function(req,res){
+	var user = req.session.user.name;
+	console.log(user);
+
+	Comment.findAll({
+		where: {
+			userId: 1
+		}
+	})
+	.then(function(rows) {
+			for(var i = 0; i < rows.length; i++) {
+				var columnData = rows[i].dataValues;
+				var singleuserpost = columnData.comment;
+				console.log('These are all comments in the database: '+singleuserpost);
+			}
+			res.render("profile", {userpostings: singleuserpost});
+		});
 })
 
 //ROUTE 06: DISPLAY ALL POSTINGS OF ALL USERS
-app.get('/allpostings', function(req,res) {
-	//get all postings from all users from db
-	res.render("allpostings", {allpostings: allpostings});
-})
+app.get('/allpostings', function (req, res) {
+    var user = req.session.user;
+    if (user === undefined) {
+        res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
+    } else {
+        res.render("allpostings");
+    }
+});
+
+app.post('/allpostings', function(req,res){
+	Comment.findAll().then(function(rows){
+		for (var i = 0; i < rows.length; i++){
+				var columnData = rows[i].dataValues;
+				var allpostings = columnData.comment;
+				console.log('These are all postings in the database: '+allpostings);
+		}
+		res.render("allpostings", {allpostings: allpostings});
+	});
+});
 
 //------------DEFINING PORT 8080 FOR SERVER----------------------
 var server = app.listen(8080, () => {
