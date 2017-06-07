@@ -142,6 +142,16 @@ app.post('/', function (req,res) {
     });
 });
 
+//ROUTE: SIGN OUT
+app.get('/logout', function (request, response) {
+    request.session.destroy(function(error) {
+        if(error) {
+            throw error;
+        }
+        response.redirect('/?message=' + encodeURIComponent("Successfully logged out."));
+    })
+});
+
 //ROUTE 01: WRITING A NEW POST
 app.get('/addpost', function(req,res) {
 	res.render("addpost");
