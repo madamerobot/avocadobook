@@ -163,9 +163,6 @@ app.get('/addpost', function (req, res) {
     }
 });
 
-//Global variable to use outside of function scope
-// var inputmessage = [];
-
 app.post('/addpost', function(req,res) {
 	
 	var user = req.session.user.name;
@@ -185,20 +182,23 @@ app.post('/addpost', function(req,res) {
     });
 });
 
-app.post('/comment', (req, res) => {
-	const comment = request.body.comment;
-	const postId = request.body.postId
-	//put it in the database
-	res.redirect(`/posts/${postId}`)
-})
+//---MEVLIN INPUT BELOW-------
 
-//app.get -- localhost:3000/posts
-//app.get -- localhost:3000/posts/1
+// app.post('/comment', (req, res) => {
+// 	const comment = request.body.comment;
+// 	const postId = request.body.postId
+// 	//put it in the database
+// 	res.redirect(`/posts/${postId}`)
+// })
+
+// //app.get -- localhost:3000/posts
+// //app.get -- localhost:3000/posts/1
  
-app.get('/posts/:postId', (req, res) => {
-	const postId = req.params.postId
-	
-})
+// app.get('/posts/:postId', (req, res) => {
+// 	const postId = req.params.postId
+
+// })
+//----END MELVIN INPUT------------
 
 //ROUTE 02: WRITING A COMMENT
 app.post('/post', function(req,res){

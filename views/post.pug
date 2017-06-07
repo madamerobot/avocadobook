@@ -7,13 +7,10 @@ html(lang='en')
 		title Posting Detail Page
 	body
 		h3 Read The Post:
-			h4=postingcontent
+			h4#postingcontent=postingcontent
 		h3 What other users said about this:
 			p=comments
 			p=name
-		//- each hit in comments
-		//- 	p=hit.comment
-		//- 	p _____
 		form.col.s12(action='/post', method='POST', autocomplete='off' id='form')
 			label(for='Comment') Anything to add?
 			br
