@@ -84,13 +84,9 @@ app.post('/signup', function(req,res){
 	console.log("I am receiving following user credentials: "+inputname+" "+inputpassword);
 
 	// Creating a new user
-	sequelize
-		.sync({force: true})
-		.then(function(){
-			return User.create({
-			name: inputname,
-			password: inputpassword 
-			});
+	User.create({
+		name: inputname,
+		password: inputpassword 
 	}).then( () => {
 		res.redirect('/?message=' + encodeURIComponent("Your user got successfully created. Log in below."));
 	});
