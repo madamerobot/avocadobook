@@ -46,7 +46,6 @@ var User = sequelize.define('user', {
 
 var Post = sequelize.define('post', {
 	post: Sequelize.STRING,
-	postId: Sequelize.INTEGER
 });
 
 var Comment = sequelize.define('comment', {
@@ -156,8 +155,6 @@ app.get('/logout', function (req, res) {
 app.get('/addpost', function (req, res) {
 
 	const user = req.session.user;
-	// var randomNr = Math.floor((Math.random() * 1000) + 1);
-	// console.log('This is your postId: '+randomNr);
     
     if (user === undefined) {
         res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
@@ -170,10 +167,8 @@ app.post('/addpost', function(req,res) {
 	
 	var user = req.session.user.name;
 	var inputmessage = req.body.posting;
-	// var postId = req.body.postId;
 	console.log('I receive this input as new posting: '+inputmessage);
 	console.log('I receive this as user info: '+user);
-	console.log('I receive this as postId: '+postId);
 
 	User.findOne({
     	where: {
@@ -193,7 +188,7 @@ app.post('/addpost', function(req,res) {
 app.get('/posts/:postId', function(req, res){
 	
 	const postId = req.params.postId;
-	console.log('This is what I receive as postId: '+postId);
+	console.log('This is what I receive as postId in the postId get request: '+postId);
 
 	Post.findOne({
 		where: {
@@ -203,29 +198,21 @@ app.get('/posts/:postId', function(req, res){
 			model: Comment
 		}]
 	})
-		.then(function(postings){
-			for (var i = 0; i<postings.length; i++){
-				var columnData = postings[i].dataValues;
-				var posting = columnData.post;
-				console.log('This is the post with postId'+' '+postId+': '+posting);
-			}
-			console.log('posting.comments')
-			console.log(posting.comments)
-			res.render("post", {postingcontent: posting}); // -- synchronous 'beauty' (well not really beautiful but you get the point)
-		})//closing then
-	})//closing post.findOne
-	// res.render("post", {postingcontent: posting}); -- asynchronous mayhem
+	.then(function(post){
+		var allcomments = post.comments;
+		console.log('All comments: '+ allcomments);
+		res.render("post", {postingcontent: post.post, comments: allcomments, postId: postId});
+	})
 });//closing app-get posts request
-
 
 app.post('/comment/:postId', function(req, res) {
 
 	const postId = req.params.postId;
-	console.log('This is what I receive as postId: '+postId);
+	console.log('This is what I receive as postId in the comment post request: '+postId);
 	const user = req.session.user.name;
-	console.log('I see this as session user: '+user);
+	console.log('I see this as session user in the comment post request: '+user);
 	const inputcomment = req.body.comment;
-	console.log('I receive this input as new comment: '+inputcomment);
+	console.log('I receive this input as new comment in the comment post request: '+inputcomment);
 
 	User.findOne({
 		where: {
@@ -242,69 +229,6 @@ app.post('/comment/:postId', function(req, res) {
 	res.redirect(`/posts/${postId}`)
 });
 	
-//---MEVLIN INPUT BELOW-------
-
-// app.post('/comment', (req, res) => {
-// 	const comment = request.body.comment;
-// 	const postId = request.body.postId
-// 	//put it in the database
-// 	res.redirect(`/posts/${postId}`)
-// })
-
-// //app.get -- localhost:3000/posts
-// //app.get -- localhost:3000/posts/1
- 
-// app.get('/posts/:postId', (req, res) => {
-// 	const postId = req.params.postId
-
-// })
-//----END MELVIN INPUT------------
-
-// //ROUTE 02: WRITING A COMMENT
-// app.post('/post', function(req,res){
-
-// 	var user = req.session.user.name;
-// 	console.log('I see this as session user: '+user);
-// 	var inputcomment = req.body.comment;
-// 	console.log('I receive this input as new comment: '+inputcomment);
-// 	var inputcomment2 = req.body.posting;
-// 	console.log('I receive this input as new comment: '+inputcomment2);
-	
-// 	User.findOne({
-// 		where: {
-// 			name: user
-// 		}
-// 	}).then(function(user){
-// 		console.log('Seq finds this user: '+user);
-// 		user.createComment(
-// 			{comment: inputcomment});
-// 	});
-
-// 	Post.findOne({
-// 		where: {
-// 			post: inputmessage
-// 		}
-// 	}).then(function(post){
-// 		console.log('Seq finds this post: '+post);
-// 		post.createComment(
-// 			{comment: inputcomment});
-// 	});
-
-// 	Comment.findAll({
-// 		where: {
-// 			comment: inputmessage
-// 		}
-// 	}).then(function(comment){
-// 		console.log('Seq finds these comments: '+comment);
-// 		for (var i = 0; i<comment.length; i++){
-// 			var columnData = comment[i].dataValues;
-// 			var usercomments = columnData.comment;
-// 			console.log('All user comments in db: '+usercomments);
-// 		}
-// 	});
-// 	res.render("post", {comments: usercomments});
-// });
-
 //ROUTE 05: DISPLAY ALL POSTINGS OF A SINGLE USER
 app.get('/profile', function (req, res) {
     var user = req.session.user;
