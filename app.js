@@ -45,7 +45,8 @@ var User = sequelize.define('user', {
 });
 
 var Post = sequelize.define('post', {
-	post: Sequelize.STRING
+	post: Sequelize.STRING,
+	postId: Sequelize.INTEGER
 });
 
 var Comment = sequelize.define('comment', {
@@ -154,7 +155,9 @@ app.get('/logout', function (req, res) {
 //ROUTE 01: WRITING A NEW POST
 app.get('/addpost', function (req, res) {
 
-	var user = req.session.user;
+	const user = req.session.user;
+	// var randomNr = Math.floor((Math.random() * 1000) + 1);
+	// console.log('This is your postId: '+randomNr);
     
     if (user === undefined) {
         res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
@@ -167,21 +170,78 @@ app.post('/addpost', function(req,res) {
 	
 	var user = req.session.user.name;
 	var inputmessage = req.body.posting;
+	// var postId = req.body.postId;
 	console.log('I receive this input as new posting: '+inputmessage);
 	console.log('I receive this as user info: '+user);
+	console.log('I receive this as postId: '+postId);
 
 	User.findOne({
     	where: {
     		name: user
     	}
-    }).then(function(user){
-    	user.createPost(
-    		{post: inputmessage
-    	});
-    	res.render("post", {postingcontent: inputmessage});	
-    });
+    })
+    .then(function(user){
+    	return user.createPost({
+    		post: inputmessage
+    	})
+    })
+    .then( post => {
+		res.redirect(`/posts/${post.id}`);
+    })
 });
 
+app.get('/posts/:postId', function(req, res){
+	
+	const postId = req.params.postId;
+	console.log('This is what I receive as postId: '+postId);
+
+	Post.findOne({
+		where: {
+			id: postId
+		},
+		include: [{
+			model: Comment
+		}]
+	})
+		.then(function(postings){
+			for (var i = 0; i<postings.length; i++){
+				var columnData = postings[i].dataValues;
+				var posting = columnData.post;
+				console.log('This is the post with postId'+' '+postId+': '+posting);
+			}
+			console.log('posting.comments')
+			console.log(posting.comments)
+			res.render("post", {postingcontent: posting}); // -- synchronous 'beauty' (well not really beautiful but you get the point)
+		})//closing then
+	})//closing post.findOne
+	// res.render("post", {postingcontent: posting}); -- asynchronous mayhem
+});//closing app-get posts request
+
+
+app.post('/comment/:postId', function(req, res) {
+
+	const postId = req.params.postId;
+	console.log('This is what I receive as postId: '+postId);
+	const user = req.session.user.name;
+	console.log('I see this as session user: '+user);
+	const inputcomment = req.body.comment;
+	console.log('I receive this input as new comment: '+inputcomment);
+
+	User.findOne({
+		where: {
+			name: user
+		}
+	})
+	.then(function(user){
+		console.log('Seq finds this user: '+user);
+		return user.createComment({
+			comment: inputcomment,
+			postId: postId //linking the post id that you got from the URL to the comment
+		})
+	}) 
+	res.redirect(`/posts/${postId}`)
+});
+	
 //---MEVLIN INPUT BELOW-------
 
 // app.post('/comment', (req, res) => {
@@ -200,52 +260,50 @@ app.post('/addpost', function(req,res) {
 // })
 //----END MELVIN INPUT------------
 
-//ROUTE 02: WRITING A COMMENT
-app.post('/post', function(req,res){
+// //ROUTE 02: WRITING A COMMENT
+// app.post('/post', function(req,res){
 
-	var user = req.session.user.name;
-	console.log('I see this as session user: '+user);
-	var inputcomment = req.body.comment;
-	console.log('I receive this input as new comment: '+inputcomment);
-	var inputcomment2 = req.body.posting;
-	console.log('I receive this input as new comment: '+inputcomment2);
-	var inputmessage = document.getElementById("postingcontent").value;
-	console.log('I see this value as posting content: '+inputmessage);
+// 	var user = req.session.user.name;
+// 	console.log('I see this as session user: '+user);
+// 	var inputcomment = req.body.comment;
+// 	console.log('I receive this input as new comment: '+inputcomment);
+// 	var inputcomment2 = req.body.posting;
+// 	console.log('I receive this input as new comment: '+inputcomment2);
+	
+// 	User.findOne({
+// 		where: {
+// 			name: user
+// 		}
+// 	}).then(function(user){
+// 		console.log('Seq finds this user: '+user);
+// 		user.createComment(
+// 			{comment: inputcomment});
+// 	});
 
-	User.findOne({
-		where: {
-			name: user
-		}
-	}).then(function(user){
-		console.log('Seq finds this user: '+user);
-		user.createComment(
-			{comment: inputcomment});
-	});
+// 	Post.findOne({
+// 		where: {
+// 			post: inputmessage
+// 		}
+// 	}).then(function(post){
+// 		console.log('Seq finds this post: '+post);
+// 		post.createComment(
+// 			{comment: inputcomment});
+// 	});
 
-	Post.findOne({
-		where: {
-			post: inputmessage
-		}
-	}).then(function(post){
-		console.log('Seq finds this post: '+post);
-		post.createComment(
-			{comment: inputcomment});
-	});
-
-	Comment.findAll({
-		where: {
-			comment: inputmessage
-		}
-	}).then(function(comment){
-		console.log('Seq finds these comments: '+comment);
-		for (var i = 0; i<comment.length; i++){
-			var columnData = comment[i].dataValues;
-			var usercomments = columnData.comment;
-			console.log('All user comments in db: '+usercomments);
-		}
-	});
-	res.render("post", {comments: usercomments});
-});
+// 	Comment.findAll({
+// 		where: {
+// 			comment: inputmessage
+// 		}
+// 	}).then(function(comment){
+// 		console.log('Seq finds these comments: '+comment);
+// 		for (var i = 0; i<comment.length; i++){
+// 			var columnData = comment[i].dataValues;
+// 			var usercomments = columnData.comment;
+// 			console.log('All user comments in db: '+usercomments);
+// 		}
+// 	});
+// 	res.render("post", {comments: usercomments});
+// });
 
 //ROUTE 05: DISPLAY ALL POSTINGS OF A SINGLE USER
 app.get('/profile', function (req, res) {
