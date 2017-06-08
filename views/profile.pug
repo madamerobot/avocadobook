@@ -6,6 +6,7 @@ html(lang='en')
 		include navigation.pug
 		title Your profile
 	body
-		h4 Welcome to your profile
-		h4=user.name
-		p=user.post
+		h4 Welcome to your profile #{username}
+		h4 Check out all your posts below:
+		h4 ----------
+		h4=userpostings

@@ -132,7 +132,8 @@ app.post('/', function (req,res) {
     }).then(function (user) {
         if (user !== null && req.body.password === user.password) {
             req.session.user = user;
-            res.render("profile", {user: user});
+            res.render("profile", {username: req.body.username});
+		// res.redirect(`/profile/${user.name}`));
         } else {
             res.redirect('/?message=' + encodeURIComponent("Invalid email or password."));
         }
@@ -168,7 +169,7 @@ app.post('/addpost', function(req,res) {
 	var user = req.session.user.name;
 	var inputmessage = req.body.posting;
 	console.log('I receive this input as new posting: '+inputmessage);
-	console.log('I receive this as user info: '+user);
+	console.log('I receive this input as user info: '+user);
 
 	User.findOne({
     	where: {
@@ -231,32 +232,32 @@ app.post('/comment/:postId', function(req, res) {
 	
 //ROUTE 05: DISPLAY ALL POSTINGS OF A SINGLE USER
 app.get('/profile', function (req, res) {
+    
     var user = req.session.user;
+    var username = req.session.user.name;
+    var userid = user.id
+    console.log('UserId: '+userid);
+
     if (user === undefined) {
         res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
     } else {
-        res.render("profile");
+        Post.findAll({
+			where: {
+				userId: userid
+			}
+		})
+		.then(function(postings) {
+			for (var i = 0; i < postings.length; i++){
+				var columnData = postings[i].dataValues;
+				console.log('This is column data: '+columnData);
+				var allpostings = columnData.post;
+				console.log('This is allpostings: '+allpostings);
+			}
+			console.log('These are all postings in the database: '+allpostings);
+			res.render("profile", {userpostings: allpostings, username: username});
+		});
     }
 });
-
-app.post('/profile', function(req,res){
-	var user = req.session.user.name;
-	console.log(user);
-
-	Comment.findAll({
-		where: {
-			userId: 1
-		}
-	})
-	.then(function(rows) {
-			for(var i = 0; i < rows.length; i++) {
-				var columnData = rows[i].dataValues;
-				var singleuserpost = columnData.comment;
-				console.log('These are all comments in the database: '+singleuserpost);
-			}
-			res.render("profile", {userpostings: singleuserpost});
-		});
-})
 
 //ROUTE 06: DISPLAY ALL POSTINGS OF ALL USERS
 app.get('/allpostings', function (req, res) {
@@ -281,6 +282,6 @@ app.post('/allpostings', function(req,res){
 
 //------------DEFINING PORT 8080 FOR SERVER----------------------
 var server = app.listen(8080, () => {
-	sequelize.sync({force: true})
+	sequelize.sync({force: false})
 	console.log('Yo, this http://localhost is running:' + server.address().port);
 });
