@@ -132,8 +132,7 @@ app.post('/', function (req,res) {
     }).then(function (user) {
         if (user !== null && req.body.password === user.password) {
             req.session.user = user;
-            res.render("profile", {username: req.body.username});
-		// res.redirect(`/profile/${user.name}`));
+			res.redirect(`/profile/${user.name}`);
         } else {
             res.redirect('/?message=' + encodeURIComponent("Invalid email or password."));
         }
@@ -231,10 +230,10 @@ app.post('/comment/:postId', function(req, res) {
 });
 	
 //ROUTE 05: DISPLAY ALL POSTINGS OF A SINGLE USER
-app.get('/profile', function (req, res) {
+app.get('/profile/:username', function (req, res) {
     
+    var username = req.params.username;
     var user = req.session.user;
-    var username = req.session.user.name;
     var userid = user.id
     console.log('UserId: '+userid);
 
@@ -246,38 +245,27 @@ app.get('/profile', function (req, res) {
 				userId: userid
 			}
 		})
-		.then(function(postings) {
-			for (var i = 0; i < postings.length; i++){
-				var columnData = postings[i].dataValues;
-				console.log('This is column data: '+columnData);
-				var allpostings = columnData.post;
-				console.log('This is allpostings: '+allpostings);
-			}
-			console.log('These are all postings in the database: '+allpostings);
-			res.render("profile", {userpostings: allpostings, username: username});
+		.then(function(alluserpostings){	
+			console.log(JSON.stringify(alluserpostings, null, 2));
+			res.render("profile", {alluserpostings: alluserpostings});
 		});
     }
 });
 
 //ROUTE 06: DISPLAY ALL POSTINGS OF ALL USERS
 app.get('/allpostings', function (req, res) {
+    
     var user = req.session.user;
     if (user === undefined) {
         res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
     } else {
-        res.render("allpostings");
-    }
-});
-
-app.post('/allpostings', function(req,res){
-	Comment.findAll().then(function(rows){
-		for (var i = 0; i < rows.length; i++){
-				var columnData = rows[i].dataValues;
-				var allpostings = columnData.comment;
-				console.log('These are all postings in the database: '+allpostings);
-		}
-		res.render("allpostings", {allpostings: allpostings});
-	});
+        Post.findAll({
+        	include: [User]
+        }).then(function(allpostings){	
+			console.log(JSON.stringify(allpostings, null, 2));
+			res.render("allpostings", {allpostings: allpostings});
+		});
+	}
 });
 
 //------------DEFINING PORT 8080 FOR SERVER----------------------

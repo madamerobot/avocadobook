@@ -7,4 +7,7 @@ html(lang='en')
 		title All Postings
 	body
 		h4 This is what your network has to say...
-		h3=allpostings
+		each hit in allpostings
+			p=hit.post
+			p Created by #{hit.user.name} on #{hit.createdAt}
+
