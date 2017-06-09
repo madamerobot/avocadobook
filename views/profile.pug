@@ -4,13 +4,22 @@ html(lang='en')
 		meta(http-equiv='Content-Type', content='text/html; charset=UTF-8')
 		meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1.0')
 		include navigation.pug
+		include references.pug
 		title Your profile
 	body
-		h1 #{username} Avocado Profile
-		h2 This is what -#{username}- has to say:
-		p ...
-		each hit in alluserpostings
-			p=hit.post
-			p Created on #{hit.createdAt}
-			a(href=`/posts/${hit.id}`) View post and comments
-			p ....
+		header.intro-header(style="background-image: url('/img/post-bg.jpg')")
+			.container
+				.row
+					.col-lg-8.col-lg-offset-2.col-md-10.col-md-offset-1
+						.post-heading
+							h1 Your Avocado Profile #{username} 
+		.container
+			.row
+				.col-lg-8.col-lg-offset-2.col-md-10.col-md-offset-1
+					.post-preview
+						each hit in alluserpostings
+							a(href=`/posts/${hit.id}`)
+								h2.post-title=hit.post
+								p.post-meta Created on #{hit.createdAt}
+								hr
+	include references_footer.pug

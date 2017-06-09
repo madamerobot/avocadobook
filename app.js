@@ -74,7 +74,10 @@ Comment.belongsTo(Post);
 //ROUTE 01: HOME------------------------
 app.get('/', function(req, res){
 
-	res.render("home");
+	var user = req.session.user;
+	var message = req.query.message;
+
+	res.render("home", {user: user, message: message});
 
 });
 

@@ -4,20 +4,30 @@ html(lang='en')
 		meta(http-equiv='Content-Type', content='text/html; charset=UTF-8')
 		meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1.0')
 		include navigation.pug
+		include references.pug
 		title Posting Detail Page
 	body
-		h3 Read The Post:
-			h4#postingcontent=postingcontent
-		h3 What other users said about this:
-		each hit in comments
-			p=hit.comment
-			p Written by user #{hit.userId}
-			p ...
-		form.col.s12(action=`/comment/${postId}`, method='POST', autocomplete='off' id='form')
-			label(for='Comment') Anything to add?
-			br
-			br
-			input#name.validate(type='text', name='comment')
-			br
-			br
-			input#seepreview.mybutton(type='submit', name='submit', value="Publish Comment")
+		header.intro-header(style="background-image: url('/img/post-bg.jpg')")
+			.container
+				.row
+					.col-lg-8.col-lg-offset-2.col-md-10.col-md-offset-1
+						.post-heading
+							h1#postingcontent=postingcontent
+							span.meta Posted by #{username} on #{createdAt}
+		.container
+			.row
+				.col-lg-8.col-lg-offset-2.col-md-10.col-md-offset-1
+					h3 Comments:
+					p
+					each hit in comments
+						h4=hit.comment
+						span.meta Written by user #{hit.userId}
+						br
+						p
+					h3 Anything to add?
+					form.col.s12(action=`/comment/${postId}`, method='POST', autocomplete='off' id='form')
+						br
+						input#name.validate(type='text', name='comment')
+						br
+						br
+						button#seepreview.btn.btn-default(type='submit', name='submit') PUBLISH COMMENT
