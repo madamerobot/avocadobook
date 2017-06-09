@@ -9,7 +9,7 @@ html(lang='en')
 	body
 		// Page Header
 		// Set your background image for this header on the line below.
-		header.intro-header(style="background-image: url('/img/avocadobg.jpg')")
+		header.intro-header(style="background-image: url('/img/avocadobg2.png')")
 			.container
 				.row
 					.col-lg-8.col-lg-offset-2.col-md-10.col-md-offset-1
@@ -17,16 +17,15 @@ html(lang='en')
 							h1 The Avocado Net
 							hr.small
 							span.meta=message
-							form#signin(action='/', method='POST', autocomplete='off', novalidate)
-								div.form-group
+							form#signin(action='/', method='POST', autocomplete='off')
 								label(for='username') YOUR NAME
 								br
-								input#name.validate(type='text', name='username')
+								input#name.validate(type='text', name='username', placeholder="Username")
 								br
 								br
 								label(for='password') YOUR PASSWORD
 								br
-								input#password.validate(type='text', name='password')
+								input#password.validate(type='text', name='password', placeholder="Password")
 								br
 								br
 								button.btn.btn-default#seepreview(type="submit", name="login") LOGIN

@@ -7,7 +7,7 @@ html(lang='en')
 		include references.pug
 		title Add A Post
 	body
-		header.intro-header(style="background-image: url('/img/avocadobg.jpg')")
+		header.intro-header(style="background-image: url('/img/avocadobg2-green.png')")
 			.container
 				.row
 					.col-lg-8.col-lg-offset-2.col-md-10.col-md-offset-1
@@ -21,5 +21,5 @@ html(lang='en')
 								input#name.validate(type='text', name='posting')
 								br
 								br
-								input#seepreview.mybutton(type='submit', name='submit', value="Publish Post")
+								button.btn.btn-default#writepost(type="submit", name="submit") PUBLISH POST
 	include references_footer.pug
