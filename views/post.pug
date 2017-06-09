@@ -11,6 +11,8 @@ html(lang='en')
 		h3 What other users said about this:
 		each hit in comments
 			p=hit.comment
+			p Written by user #{hit.userId}
+			p ...
 		form.col.s12(action=`/comment/${postId}`, method='POST', autocomplete='off' id='form')
 			label(for='Comment') Anything to add?
 			br

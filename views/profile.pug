@@ -6,8 +6,8 @@ html(lang='en')
 		include navigation.pug
 		title Your profile
 	body
-		h4 Welcome to your profile #{username}
-		h4 Check out all your posts below:
+		h1 #{username} Avocado Profile
+		h2 This is what -#{username}- has to say:
 		p ...
 		each hit in alluserpostings
 			p=hit.post

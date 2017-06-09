@@ -6,7 +6,7 @@ html(lang='en')
 		include navigation.pug
 		title All Postings
 	body
-		h4 This is what your network has to say...
+		h1 This is what your network says about Avocados...
 		each hit in allpostings
 			p=hit.post
 			p Created by #{hit.user.name} on #{hit.createdAt}

@@ -12,7 +12,7 @@ const app = express();
 var session = require('express-session')
 //Initialising session
 app.use(session({
-	secret: 'oh wow very secret much security',
+	secret: 'Heckmeck am Bratwurmeck',
 	resave: true,
 	saveUninitialized: false
 }));
@@ -71,43 +71,15 @@ Comment.belongsTo(Post);
 
 //----------------ROUTES----------------
 
-//ROUTE 04: CREATE A NEW USER
-app.get('/signup', function(req,res){
-	res.render("signup");
-})
+//ROUTE 01: HOME------------------------
+app.get('/', function(req, res){
 
-app.post('/signup', function(req,res){
+	res.render("home");
 
-	var inputname = req.body.username;
-	var inputpassword = req.body.password;
-
-	console.log("I am receiving following user credentials: "+inputname+" "+inputpassword);
-
-	// Creating a new user
-	User.create({
-		name: inputname,
-		password: inputpassword 
-	}).then( () => {
-		res.redirect('/?message=' + encodeURIComponent("Your user got successfully created. Log in below."));
-	});
-})
-
-//ROUTE 03: SIGN IN
-app.get('/', function(req,res){
-
-	console.log('User: '+req.session.user);
-	console.log('Message: '+req.query.message);
-
-	res.render("home", {
-		message: req.query.message,
-		user: req.session.user
-	});
 });
 
-//Checking if either username or password are not being filled in. Then checking, if inputdata matches
-//any set from database. If given uersname exist, then check if given password is correct. Then either
-//send error message or render user profile.
-app.post('/', function (req,res) {
+//CHECKING IF FORM INPUT USERDATA MATCHES DATABASE ENTRY. IF YES, ASSIGN SESSION TO USER.
+app.post('/', function (req, res) {
 
 	console.log('This is what I get: '+req.body.username+" "+req.body.password);
 
@@ -137,17 +109,28 @@ app.post('/', function (req,res) {
 	});
 });
 
-//ROUTE: SIGN OUT
-app.get('/logout', function (req, res) {
-	req.session.destroy(function(error) {
-		if(error) {
-			throw error;
-		}
-		res.redirect('/?message=' + encodeURIComponent("Successfully logged out."));
-	})
-});
 
-//ROUTE 01: WRITING A NEW POST
+//ROUTE 02: CREATING NEW USER IN SIGNUP-------------
+app.get('/signup', function(req, res){
+	res.render("signup");
+})
+
+app.post('/signup', function(req, res){
+
+	var inputname = req.body.username;
+	var inputpassword = req.body.password;
+
+	console.log("I am receiving following user credentials: "+inputname+" "+inputpassword);
+
+	User.create({
+		name: inputname,
+		password: inputpassword 
+	}).then( () => {
+		res.redirect('/?message=' + encodeURIComponent("Your user got successfully created. Log in below."));
+	});
+})
+
+//ROUTE 03: WRITING A NEW POST---------------------
 app.get('/addpost', function (req, res) {
 
 	const user = req.session.user;
@@ -159,7 +142,7 @@ app.get('/addpost', function (req, res) {
 	}
 });
 
-app.post('/addpost', function(req,res) {
+app.post('/addpost', function(req, res) {
 	
 	var user = req.session.user.name;
 	var inputmessage = req.body.posting;
@@ -181,6 +164,8 @@ app.post('/addpost', function(req,res) {
 	})
 });
 
+//ROUTE 04: DISPLAYING SINGLE POST PAGE INCLUDING USER COMMENTS
+
 app.get('/posts/:postId', function(req, res){
 	
 	const postId = req.params.postId;
@@ -198,13 +183,11 @@ app.get('/posts/:postId', function(req, res){
 		console.log(JSON.stringify(post, null, 2));
 		console.log(post.comments);
 		res.render("post", {postingcontent: post.post, comments: post.comments, postId: postId});
-		
-
-		// var allcomments = post.comment;
-		// console.log('All comments: '+ post.comments);
-		// res.render("post", {postingcontent: post.post, comments: post.comments, postId: postId});
 	})
-});//closing app-get posts request
+});
+
+//ROUTE 05: REDIRECTING COMMENT CREATION TO SEPERATE ROUTE, 
+//SO THAT DATA HANDLING IS MORE TRANSPARENT
 
 app.post('/comment/:postId', function(req, res) {
 
@@ -224,13 +207,13 @@ app.post('/comment/:postId', function(req, res) {
 		console.log('Seq finds this user: '+user);
 		return user.createComment({
 			comment: inputcomment,
-			postId: postId //linking the post id that you got from the URL to the comment
+			postId: postId
 		})
 	}) 
 	res.redirect(`/posts/${postId}`)
 });
 	
-//ROUTE 05: DISPLAY ALL POSTINGS OF A SINGLE USER
+//ROUTE 06: DISPLAYING ALL POSTINGS OF A SINGLE USER------------
 app.get('/profile/:username', function (req, res) {
 
 	var username = req.params.username;
@@ -253,7 +236,7 @@ app.get('/profile/:username', function (req, res) {
 	}
 });
 
-//ROUTE 06: DISPLAY ALL POSTINGS OF ALL USERS
+//ROUTE 07: DISPLAYING ALL POSTINGS OF ALL USERS----------------
 app.get('/allpostings', function (req, res) {
 
 	var user = req.session.user;
@@ -267,6 +250,17 @@ app.get('/allpostings', function (req, res) {
 			res.render("allpostings", {allpostings: allpostings});
 		});
 	}
+});
+
+//ROUTE 08: SIGN OUT--------------------------------------------
+app.get('/logout', function (req, res) {
+
+	req.session.destroy(function(error) {
+		if(error) {
+			throw error;
+		}
+		res.redirect('/?message=' + encodeURIComponent("Successfully logged out."));
+	})
 });
 
 //------------DEFINING PORT 8080 FOR SERVER----------------------
