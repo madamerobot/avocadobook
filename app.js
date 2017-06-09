@@ -12,9 +12,9 @@ const app = express();
 var session = require('express-session')
 //Initialising session
 app.use(session({
-    secret: 'oh wow very secret much security',
-    resave: true,
-    saveUninitialized: false
+	secret: 'oh wow very secret much security',
+	resave: true,
+	saveUninitialized: false
 }));
 
 //Requiring file system library
@@ -111,52 +111,52 @@ app.post('/', function (req,res) {
 
 	console.log('This is what I get: '+req.body.username+" "+req.body.password);
 
-    if(req.body.username.length === 0) {
-        res.redirect('/?message=' + encodeURIComponent("Please fill out your email address."));
-        return;
-    }
+	if(req.body.username.length === 0) {
+		res.redirect('/?message=' + encodeURIComponent("Please fill out your email address."));
+		return;
+	}
 
-    if(req.body.password.length === 0) {
-        res.redirect('/?message=' + encodeURIComponent("Please fill out your password."));
-        return;
-    }
+	if(req.body.password.length === 0) {
+		res.redirect('/?message=' + encodeURIComponent("Please fill out your password."));
+		return;
+	}
 
-    User.findOne({
-        where: {
-            name: req.body.username
-        }
-    }).then(function (user) {
-        if (user !== null && req.body.password === user.password) {
-            req.session.user = user;
+	User.findOne({
+		where: {
+			name: req.body.username
+		}
+	}).then(function (user) {
+		if (user !== null && req.body.password === user.password) {
+			req.session.user = user;
 			res.redirect(`/profile/${user.name}`);
-        } else {
-            res.redirect('/?message=' + encodeURIComponent("Invalid email or password."));
-        }
-    }, function (error) {
-        res.redirect('/?message=' + encodeURIComponent("Invalid email or password."));
-    });
+		} else {
+			res.redirect('/?message=' + encodeURIComponent("Invalid email or password."));
+		}
+	}, function (error) {
+		res.redirect('/?message=' + encodeURIComponent("Invalid email or password."));
+	});
 });
 
 //ROUTE: SIGN OUT
 app.get('/logout', function (req, res) {
-    req.session.destroy(function(error) {
-        if(error) {
-            throw error;
-        }
-        res.redirect('/?message=' + encodeURIComponent("Successfully logged out."));
-    })
+	req.session.destroy(function(error) {
+		if(error) {
+			throw error;
+		}
+		res.redirect('/?message=' + encodeURIComponent("Successfully logged out."));
+	})
 });
 
 //ROUTE 01: WRITING A NEW POST
 app.get('/addpost', function (req, res) {
 
 	const user = req.session.user;
-    
-    if (user === undefined) {
-        res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
-    } else {
-        res.render("addpost");
-    }
+
+	if (user === undefined) {
+		res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
+	} else {
+		res.render("addpost");
+	}
 });
 
 app.post('/addpost', function(req,res) {
@@ -167,18 +167,18 @@ app.post('/addpost', function(req,res) {
 	console.log('I receive this input as user info: '+user);
 
 	User.findOne({
-    	where: {
-    		name: user
-    	}
-    })
-    .then(function(user){
-    	return user.createPost({
-    		post: inputmessage
-    	})
-    })
-    .then( post => {
+		where: {
+			name: user
+		}
+	})
+	.then(function(user){
+		return user.createPost({
+			post: inputmessage
+		})
+	})
+	.then( post => {
 		res.redirect(`/posts/${post.id}`);
-    })
+	})
 });
 
 app.get('/posts/:postId', function(req, res){
@@ -195,9 +195,14 @@ app.get('/posts/:postId', function(req, res){
 		}]
 	})
 	.then(function(post){
-		var allcomments = post.comments;
-		console.log('All comments: '+ allcomments);
-		res.render("post", {postingcontent: post.post, comments: allcomments, postId: postId});
+		console.log(JSON.stringify(post, null, 2));
+		console.log(post.comments);
+		res.render("post", {postingcontent: post.post, comments: post.comments, postId: postId});
+		
+
+		// var allcomments = post.comment;
+		// console.log('All comments: '+ post.comments);
+		// res.render("post", {postingcontent: post.post, comments: post.comments, postId: postId});
 	})
 });//closing app-get posts request
 
@@ -227,16 +232,16 @@ app.post('/comment/:postId', function(req, res) {
 	
 //ROUTE 05: DISPLAY ALL POSTINGS OF A SINGLE USER
 app.get('/profile/:username', function (req, res) {
-    
-    var username = req.params.username;
-    var user = req.session.user;
-    var userid = user.id
-    console.log('UserId: '+userid);
 
-    if (user === undefined) {
-        res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
-    } else {
-        Post.findAll({
+	var username = req.params.username;
+	var user = req.session.user;
+	var userid = user.id
+	console.log('UserId: '+userid);
+
+	if (user === undefined) {
+		res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
+	} else {
+		Post.findAll({
 			where: {
 				userId: userid
 			}
@@ -245,19 +250,19 @@ app.get('/profile/:username', function (req, res) {
 			console.log(JSON.stringify(alluserpostings, null, 2));
 			res.render("profile", {alluserpostings: alluserpostings});
 		});
-    }
+	}
 });
 
 //ROUTE 06: DISPLAY ALL POSTINGS OF ALL USERS
 app.get('/allpostings', function (req, res) {
-    
-    var user = req.session.user;
-    if (user === undefined) {
-        res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
-    } else {
-        Post.findAll({
-        	include: [User]
-        }).then(function(allpostings){	
+
+	var user = req.session.user;
+	if (user === undefined) {
+		res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
+	} else {
+		Post.findAll({
+			include: [User]
+		}).then(function(allpostings){	
 			console.log(JSON.stringify(allpostings, null, 2));
 			res.render("allpostings", {allpostings: allpostings});
 		});

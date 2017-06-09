@@ -10,4 +10,6 @@ html(lang='en')
 		each hit in allpostings
 			p=hit.post
 			p Created by #{hit.user.name} on #{hit.createdAt}
+			a(href=`/posts/${hit.id}`) Read comments here
+			p .....
 

@@ -8,7 +8,9 @@ html(lang='en')
 	body
 		h4 Welcome to your profile #{username}
 		h4 Check out all your posts below:
-		h4 ----------
+		p ...
 		each hit in alluserpostings
 			p=hit.post
 			p Created on #{hit.createdAt}
+			a(href=`/posts/${hit.id}`) View post and comments
+			p ....

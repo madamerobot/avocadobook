@@ -9,7 +9,8 @@ html(lang='en')
 		h3 Read The Post:
 			h4#postingcontent=postingcontent
 		h3 What other users said about this:
-			p=comments.comment
+		each hit in comments
+			p=hit.comment
 		form.col.s12(action=`/comment/${postId}`, method='POST', autocomplete='off' id='form')
 			label(for='Comment') Anything to add?
 			br
