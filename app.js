@@ -2,7 +2,7 @@
 
 //Requiring Sequelize library & initiating db connection
 const Sequelize = require('sequelize');
-const sequelize = new Sequelize('postgres://daisy:Duck@localhost/avocadonet');
+const sequelize= new Sequelize('postgres://' + process.env.POSTGRES_USER + ':' + process.env.POSTGRES_PASSWORD + '@localhost/avocadonet');
 
 //Requiring express library
 const express = require('express');
