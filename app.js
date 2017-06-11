@@ -201,19 +201,23 @@ app.post('/comment/:postId', function(req, res) {
 	const inputcomment = req.body.comment;
 	console.log('I receive this input as new comment in the comment post request: '+inputcomment);
 
-	User.findOne({
-		where: {
-			name: user
-		}
-	})
-	.then(function(user){
-		console.log('Seq finds this user: '+user);
-		return user.createComment({
-			comment: inputcomment,
-			postId: postId
+	if (user === undefined) {
+		res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
+	} else {
+		User.findOne({
+			where: {
+				name: user
+			}
 		})
-	}) 
-	res.redirect(`/posts/${postId}`)
+		.then(function(user){
+			console.log('Seq finds this user: '+user);
+			return user.createComment({
+				comment: inputcomment,
+				postId: postId
+			})
+		}) 
+		res.redirect(`/posts/${postId}`)
+	}
 });
 	
 //ROUTE 06: DISPLAYING ALL POSTINGS OF A SINGLE USER------------
@@ -221,20 +225,30 @@ app.get('/profile/:username', function (req, res) {
 
 	var username = req.params.username;
 	var user = req.session.user;
-	var userid = user.id
-	console.log('UserId: '+userid);
+	var thisuserid;
 
 	if (user === undefined) {
 		res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
 	} else {
-		Post.findAll({
+		
+		User.findOne({
 			where: {
-				userId: userid
+				name: username
+			}
+		}).then(function(user){
+			console.log('---------->'+user.id);
+			thisuserid = user.id;
+		});
+
+		Post.findAll({
+			include: [User],
+			where: {
+				userId: thisuserid
 			}
 		})
 		.then(function(alluserpostings){	
 			console.log(JSON.stringify(alluserpostings, null, 2));
-			res.render("profile", {alluserpostings: alluserpostings});
+			res.render("profile", {alluserpostings: alluserpostings, username: username});
 		});
 	}
 });
