@@ -180,12 +180,16 @@ app.get('/posts/:postId', function(req, res){
 		},
 		include: [{
 			model: Comment
+		},
+		{
+			model: User
 		}]
 	})
 	.then(function(post){
 		console.log(JSON.stringify(post, null, 2));
 		console.log(post.comments);
-		res.render("post", {postingcontent: post.post, comments: post.comments, postId: postId});
+		console.log('Userdata: '+post.user.name);
+		res.render("post", {postingcontent: post.post, comments: post.comments, postId: postId, username: post.user.name, date: post.createdAt});
 	})
 });
 
@@ -225,30 +229,17 @@ app.get('/profile/:username', function (req, res) {
 
 	var username = req.params.username;
 	var user = req.session.user;
-	var thisuserid;
 
 	if (user === undefined) {
 		res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
 	} else {
-		
 		User.findOne({
+			include: [Post],
 			where: {
 				name: username
 			}
 		}).then(function(user){
-			console.log('---------->'+user.id);
-			thisuserid = user.id;
-		});
-
-		Post.findAll({
-			include: [User],
-			where: {
-				userId: thisuserid
-			}
-		})
-		.then(function(alluserpostings){	
-			console.log(JSON.stringify(alluserpostings, null, 2));
-			res.render("profile", {alluserpostings: alluserpostings, username: username});
+			res.render("profile", {posts: user.posts, username: user.name});
 		});
 	}
 });

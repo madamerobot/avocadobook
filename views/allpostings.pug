@@ -20,7 +20,7 @@ html(lang='en')
 						each hit in allpostings
 							a(href=`/posts/${hit.id}`)
 								h2.post-title=hit.post
-								p.post-meta Posted by #{hit.user.name} on #{hit.createdAt}
-								hr
+								p.post-meta Posted by #{hit.user.name} at #{hit.createdAt}
+							hr
 	include references_footer.pug
 
