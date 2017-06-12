@@ -103,7 +103,7 @@ app.post('/', function (req, res) {
 	}).then(function (user) {
 		if (user !== null && req.body.password === user.password) {
 			req.session.user = user;
-			res.redirect(`/profile/${user.name}`);
+			res.redirect('/myprofile');
 		} else {
 			res.redirect('/?message=' + encodeURIComponent("Invalid email or password."));
 		}
@@ -139,7 +139,7 @@ app.get('/addpost', function (req, res) {
 	const user = req.session.user;
 
 	if (user === undefined) {
-		res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
+		res.redirect('/?message=' + encodeURIComponent("Please log in to add a new post."));
 	} else {
 		res.render("addpost");
 	}
@@ -206,7 +206,7 @@ app.post('/comment/:postId', function(req, res) {
 	console.log('I receive this input as new comment in the comment post request: '+inputcomment);
 
 	if (user === undefined) {
-		res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
+		res.redirect('/?message=' + encodeURIComponent("Please log in to read the comments."));
 	} else {
 		User.findOne({
 			where: {
@@ -225,13 +225,15 @@ app.post('/comment/:postId', function(req, res) {
 });
 	
 //ROUTE 06: DISPLAYING ALL POSTINGS OF A SINGLE USER------------
+
+//MAKES IT POSSIBLE TO ACCESS ALL USER PROFILES BY USERNAME IN URL
 app.get('/profile/:username', function (req, res) {
 
 	var username = req.params.username;
 	var user = req.session.user;
 
 	if (user === undefined) {
-		res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
+		res.redirect('/?message=' + encodeURIComponent("Please log in to view other's profiles."));
 	} else {
 		User.findOne({
 			include: [Post],
@@ -244,13 +246,32 @@ app.get('/profile/:username', function (req, res) {
 	}
 });
 
+//RENDERS PERSONAL PROFILE FOR USER WHO IS LOGGED IN
+app.get('/myprofile', function (req, res){
+
+	var user = req.session.user;
+
+	if ( user === undefined) {
+		res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
+	} else {
+		User.findOne({
+			include: [Post],
+			where: {
+				name: user.name
+			}
+		}).then(function(user){
+			res.render("profile", {posts: user.posts, username: user.name});
+		})
+	}
+})
+
 
 //ROUTE 07: DISPLAYING ALL POSTINGS OF ALL USERS----------------
 app.get('/allpostings', function (req, res) {
 
 	var user = req.session.user;
 	if (user === undefined) {
-		res.redirect('/?message=' + encodeURIComponent("Please log in to view your profile."));
+		res.redirect('/?message=' + encodeURIComponent("Please log in to view all postings."));
 	} else {
 		Post.findAll({
 			include: [User]
