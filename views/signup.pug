@@ -6,7 +6,7 @@ html(lang='en')
 		include navigation.pug
 		include references.pug
 		title Sign Up
-	body
+	body#bootstrap-overrides
 		header.intro-header(style="background-image: url('/img/avocadobg2-green.png')")
 			.container
 				.row
@@ -23,7 +23,7 @@ html(lang='en')
 								br
 								label(for='password') Choose a password
 								br
-								input#password.validate(type='text', name='password')
+								input#password.validate(type='password', name='password')
 								br
 								br
 								button.btn.btn-default#signup(type="submit", name="submit") CREATE NEW ACCOUNT

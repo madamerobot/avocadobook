@@ -38,6 +38,9 @@ app.use(express.static('public'));
 //Requiring postgres library
 const pg = require('pg');
 
+//Requiring bcrypt
+var bcrypt = require('bcrypt-nodejs');
+
 //------------DEFINING DATABASE MODELS
 var User = sequelize.define('user', {
 	name: Sequelize.STRING,
@@ -53,7 +56,6 @@ var Comment = sequelize.define('comment', {
 });
 
 //Defining dependencies
-
 //A user can write many posts
 User.hasMany(Post);
 //A post only belongs to one user
@@ -84,34 +86,38 @@ app.get('/', function(req, res){
 //CHECKING IF FORM INPUT USERDATA MATCHES DATABASE ENTRY. IF YES, ASSIGN SESSION TO USER.
 app.post('/', function (req, res) {
 
-	console.log('This is what I get: '+req.body.username+" "+req.body.password);
+	var password = req.body.password;
+	var username = req.body.username;
+	console.log('This is what I get: '+username+" "+password);
 
-	if(req.body.username.length === 0) {
+	if(username.length === 0) {
 		res.redirect('/?message=' + encodeURIComponent("Please fill out your email address."));
 		return;
 	}
 
-	if(req.body.password.length === 0) {
+	if(password.length === 0) {
 		res.redirect('/?message=' + encodeURIComponent("Please fill out your password."));
 		return;
 	}
 
 	User.findOne({
 		where: {
-			name: req.body.username
+			name: username
 		}
-	}).then(function (user) {
-		if (user !== null && req.body.password === user.password) {
-			req.session.user = user;
-			res.redirect('/myprofile');
-		} else {
-			res.redirect('/?message=' + encodeURIComponent("Invalid email or password."));
-		}
-	}, function (error) {
-		res.redirect('/?message=' + encodeURIComponent("Invalid email or password."));
+	}).then(function(user){
+		var hash = user.password;
+		console.log('Hash: '+hash);
+		bcrypt.compare(password, hash, function(err, result){
+			if(err){
+				console.log(err);
+				res.redirect('/?message=' + encodeURIComponent('Invalid email or password.'));
+			} else {
+				req.session.user = user;
+				res.redirect('/myprofile');
+			}
+		});
 	});
 });
-
 
 //ROUTE 02: CREATING NEW USER IN SIGNUP-------------
 app.get('/signup', function(req, res){
@@ -125,11 +131,18 @@ app.post('/signup', function(req, res){
 
 	console.log("I am receiving following user credentials: "+inputname+" "+inputpassword);
 
-	User.create({
-		name: inputname,
-		password: inputpassword 
-	}).then( () => {
-		res.redirect('/?message=' + encodeURIComponent("Your user got successfully created. Log in below."));
+	bcrypt.hash(inputpassword, null, null, function(err, hash){
+		console.log("hi")
+		if (err){
+			console.log(err);
+		} else {
+			User.create({
+				name: inputname,
+				password: hash
+			}).then( () => {
+				res.redirect('/?message=' + encodeURIComponent("Your user got successfully created. Log in below."));
+			});
+		}
 	});
 })
 
@@ -264,7 +277,6 @@ app.get('/myprofile', function (req, res){
 		})
 	}
 })
-
 
 //ROUTE 07: DISPLAYING ALL POSTINGS OF ALL USERS----------------
 app.get('/allpostings', function (req, res) {

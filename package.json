@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/madamerobot/avocadobook#readme",
   "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.17.2",
     "bootstrap": "^3.3.7",
     "browser-sync": "^2.18.12",
