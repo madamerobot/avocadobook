@@ -244,6 +244,7 @@ app.get('/profile/:username', function (req, res) {
 	}
 });
 
+
 //ROUTE 07: DISPLAYING ALL POSTINGS OF ALL USERS----------------
 app.get('/allpostings', function (req, res) {
 

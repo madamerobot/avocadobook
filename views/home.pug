@@ -6,17 +6,15 @@ html(lang='en')
 		include navigation.pug
 		include references.pug
 		title Home
-	body
-		// Page Header
-		// Set your background image for this header on the line below.
+	body#bootstrap-overrides
 		header.intro-header(style="background-image: url('/img/avocadobg2.png')")
 			.container
 				.row
 					.col-lg-8.col-lg-offset-2.col-md-10.col-md-offset-1
 						.site-heading
-							h1.headline The Avocado Net
+							h1.headline THE <br> AVOCADO NET
+							span.meta.alert=message
 							hr.small
-							span.meta=message
 							form#signin(action='/', method='POST', autocomplete='off')
 								label(for='username') YOUR NAME
 								br
@@ -25,7 +23,7 @@ html(lang='en')
 								br
 								label(for='password') YOUR PASSWORD
 								br
-								input#password.validate(type='text', name='password', placeholder="Password")
+								input#password.validate(type='password', name='password', placeholder="Password")
 								br
 								br
 								button.btn.btn-default#seepreview(type="submit", name="login") LOGIN

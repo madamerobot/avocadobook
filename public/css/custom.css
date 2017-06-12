@@ -1,7 +1,28 @@
-#signin {
-	color: black; !important
+/*--FONTS--*/
+@font-face {
+     font-family: Track;
+     src: url("../fonts/track/Track.otf");
 }
 
-.headline {
-	color: white; !important
+#bootstrap-overrides h1{
+	color: white;
+	font-family: 'Track';
 }
+
+#bootstrap-overrides input{
+	color: black;
+}
+
+#bootstrap-overrides label{
+	font-family: 'Track';
+}
+
+/*@media only screen and (min-width: 768px){
+	.intro-header .site-heading {
+    padding: 150px 0;
+    background-color: blue;
+}*/
+
+
+
+
